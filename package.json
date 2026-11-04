@@ -1,0 +1,22 @@
+{
+  "name": "loyiha-104.11.2026",
+  "version": "1.0.0",
+  "description": "Zamonaviy, xavfsiz va kengaytiriluvchi ko‘p rolli elektron savdo tizimi.",
+  "main": "server.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node tests/api.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0"
+  }
+}

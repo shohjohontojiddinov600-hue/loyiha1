@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Market — Elektron Savdo Platformasi</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              dark: '#0f172a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased min-h-screen flex flex-col font-sans">
+
+  <!-- TOP ROLE SWITCHER BAR -->
+  <header class="bg-slate-900 text-white sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-center justify-between py-2 border-b border-slate-800 text-xs sm:text-sm">
+        <div class="flex items-center space-x-2 py-1">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+            Tizim Faol (v1.0)
+          </span>
+          <span class="text-slate-400 hidden md:inline">|</span>
+          <span class="text-slate-300 font-medium hidden md:inline">1-Qadam Arxitekturasi Asosida Amalga Oshirilgan</span>
+        </div>
+
+        <!-- Role Selector Switcher -->
+        <div class="flex items-center space-x-2 py-1">
+          <span class="text-slate-400 font-medium mr-1"><i class="fa-solid fa-users-gear mr-1"></i> Rolni tanlang:</span>
+          <div class="inline-flex rounded-lg bg-slate-800 p-0.5" id="roleSelector">
+            <button onclick="switchRole('mehmon')" id="btn-mehmon" class="role-btn px-2.5 py-1 text-xs font-medium rounded-md transition text-slate-300 hover:text-white">
+              🛒 Mehmon
+            </button>
+            <button onclick="switchRole('xaridor')" id="btn-xaridor" class="role-btn px-2.5 py-1 text-xs font-medium rounded-md transition text-slate-300 hover:text-white">
+              👤 Xaridor
+            </button>
+            <button onclick="switchRole('sotuvchi')" id="btn-sotuvchi" class="role-btn px-2.5 py-1 text-xs font-medium rounded-md transition text-slate-300 hover:text-white">
+              📦 Sotuvchi
+            </button>
+            <button onclick="switchRole('kuryer')" id="btn-kuryer" class="role-btn px-2.5 py-1 text-xs font-medium rounded-md transition text-slate-300 hover:text-white">
+              🚚 Kuryer
+            </button>
+            <button onclick="switchRole('admin')" id="btn-admin" class="role-btn px-2.5 py-1 text-xs font-medium rounded-md transition text-slate-300 hover:text-white">
+              ⚡ Superadmin
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN APP NAV BAR -->
+      <div class="flex items-center justify-between py-3">
+        <!-- Logo -->
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchRole('mehmon')">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
+            <i class="fa-solid fa-bag-shopping text-xl"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+              Smart Market
+              <span class="text-[10px] bg-emerald-500 text-white uppercase font-bold px-1.5 py-0.5 rounded">BETA</span>
+            </h1>
+            <p class="text-xs text-slate-400">Yagona raqamli elektron savdo ekotizimi</p>
+          </div>
+        </div>
+
+        <!-- Role Badge Display -->
+        <div class="flex items-center space-x-4">
+          <div id="currentUserBadge" class="hidden sm:flex items-center space-x-2 bg-slate-800 border border-slate-700 rounded-full px-3 py-1">
+            <div id="userAvatar" class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">M</div>
+            <div class="text-left">
+              <div id="userName" class="text-xs font-semibold text-white leading-tight">Mehmon</div>
+              <div id="userRoleTitle" class="text-[10px] text-emerald-400 leading-tight">Mehmon rejimi</div>
+            </div>
+          </div>
+
+          <!-- Cart Icon (for Guest & Customer) -->
+          <button id="cartHeaderBtn" onclick="toggleCartDrawer(true)" class="relative p-2.5 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition">
+            <i class="fa-solid fa-cart-shopping text-lg"></i>
+            <span id="cartBadgeCount" class="absolute -top-1 -right-1 bg-emerald-500 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- WORKFLOW BANNER (1.5 Biznes-jarayon ssenariysi ko'rinishi) -->
+  <div class="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white py-2 px-4 shadow-inner">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between text-xs gap-2">
+      <div class="flex items-center gap-1 font-semibold text-emerald-300">
+        <i class="fa-solid fa-arrows-spin animate-spin"></i>
+        <span>Avtomatlashtirilgan Biznes-zanjir:</span>
+      </div>
+      <div class="flex items-center flex-wrap gap-2 text-slate-300">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10">1. Mahsulot joylash</span>
+        <i class="fa-solid fa-arrow-right text-[10px] text-emerald-400"></i>
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10">2. Savatcha & Tanlov</span>
+        <i class="fa-solid fa-arrow-right text-[10px] text-emerald-400"></i>
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10">3. To'lov (Payme/Click)</span>
+        <i class="fa-solid fa-arrow-right text-[10px] text-emerald-400"></i>
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10">4. Logistika (Kuryer)</span>
+        <i class="fa-solid fa-arrow-right text-[10px] text-emerald-400"></i>
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10">5. Statistika & Chek</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ============================================================== -->
+    <!-- VIEW 1: MEHMON VA XARIDOR ASOSIY SAHIFA (KATALOG VA QIDIRUV) -->
+    <!-- ============================================================== -->
+    <div id="view-customer-catalog" class="space-y-6">
+
+      <!-- Hero Banner -->
+      <div class="relative rounded-2xl overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-800 text-white shadow-xl p-6 sm:p-8">
+        <div class="relative z-10 max-w-2xl space-y-3">
+          <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider text-emerald-100">
+            🔥 Yangi avlod e-savdo platformasi
+          </span>
+          <h2 class="text-2xl sm:text-4xl font-extrabold leading-tight">
+            Sifatli mahsulotlar, tezkor yetkazib berish va xavfsiz to'lov!
+          </h2>
+          <p class="text-sm sm:text-base text-emerald-100 font-light">
+            Payme, Click va Uzum orqali onlayn to'lang yoki mahsulot yetib kelganda to'lov qiling.
+          </p>
+        </div>
+        <div class="absolute right-0 bottom-0 opacity-15 pointer-events-none transform translate-x-10 translate-y-10">
+          <i class="fa-solid fa-cart-flatbed text-[220px]"></i>
+        </div>
+      </div>
+
+      <!-- Search & Filters Bar -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
+        <div class="flex flex-col md:flex-row gap-3">
+          <!-- Search input -->
+          <div class="relative flex-1">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text" id="searchInput" oninput="debounceSearch()" placeholder="Mahsulot nomi, brend yoki tavsif bo'yicha aqlli qidiruv..." 
+              class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+          </div>
+
+          <!-- Sort dropdown -->
+          <div class="flex gap-2">
+            <select id="sortSelect" onchange="applyFilters()" class="bg-gray-50 border border-gray-200 text-gray-700 py-2.5 px-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="newest">Yangi qo'shilganlar</option>
+              <option value="price_asc">Narx: Arzondan qimmatga</option>
+              <option value="price_desc">Narx: Qimmatdan arzonga</option>
+              <option value="rating">Reyting bo'yicha</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Categories horizontal scroll -->
+        <div class="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none" id="categoriesBar">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+            <i class="fa-solid fa-fire text-amber-500"></i>
+            <span>Mahsulotlar katalogi</span>
+            <span id="productTotalCount" class="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">0 ta</span>
+          </h3>
+          <div class="text-xs text-gray-500">Ombor real vaqt rejimida yangilanadi</div>
+        </div>
+
+        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Load More Container -->
+        <div id="loadMoreContainer" class="mt-8 text-center hidden">
+          <p id="productsShowingText" class="text-xs text-gray-500 mb-3"></p>
+          <button id="loadMoreBtn" onclick="loadMoreProducts()" class="px-6 py-2.5 bg-white border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-gray-800 hover:text-emerald-700 font-bold rounded-xl text-xs shadow-sm transition inline-flex items-center gap-2">
+            <i class="fa-solid fa-spinner"></i>
+            <span>Ko'proq ko'rsatish (+24 ta tovar)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 2: XARIDOR SHAXSIY KABINETI VA BUYURTMALARI -->
+    <!-- ============================================================== -->
+    <div id="view-customer-orders" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center space-x-4">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl font-bold">
+            JR
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-gray-800">Jasur Rahimov</h2>
+            <p class="text-sm text-gray-500"><i class="fa-solid fa-phone mr-1"></i> +998 90 123 45 67 | <i class="fa-solid fa-location-dot mr-1"></i> Toshkent sh., Chilonzor 9</p>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="switchRole('mehmon')" class="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition">
+            <i class="fa-solid fa-store mr-1.5"></i> Katalogga qaytish
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i> Mening buyurtmalarim tarixi va statusi
+        </h3>
+        <div id="customerOrdersList" class="space-y-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 3: SOTUVCHI / KONTENT-MENEJER PANELI -->
+    <!-- ============================================================== -->
+    <div id="view-seller" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">
+            Sotuvchi va Ombor Boshqaruvi
+          </span>
+          <h2 class="text-xl font-bold text-gray-800 mt-2">TechnoStore MChJ (Otabek Aliyev)</h2>
+          <p class="text-sm text-gray-500">Mahsulotlar katalogini tahrirlash, yangi tovar kiritish va ombor qoldig'ini to'ldirish</p>
+        </div>
+        <button onclick="openAddProductModal()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-sm transition flex items-center gap-2 justify-center">
+          <i class="fa-solid fa-plus"></i> Yangi mahsulot qo'shish
+        </button>
+      </div>
+
+      <!-- Seller Products Table -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+          <div>
+            <h3 class="font-bold text-gray-800">Mening mahsulotlarim va Ombor qoldiqlari</h3>
+            <span class="text-xs text-gray-500">Real vaqt rejimida zaxirani to'ldirish mumkin (<span id="sellerTotalCount">0</span> ta tovar)</span>
+          </div>
+          <div class="relative w-full sm:w-64">
+            <input type="text" id="sellerSearchInput" oninput="filterSellerTable()" placeholder="Tovar nomi yoki brend bo'yicha..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500">
+            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-gray-600">
+            <thead class="bg-gray-50 text-xs uppercase font-semibold text-gray-700">
+              <tr>
+                <th class="p-3.5">Mahsulot</th>
+                <th class="p-3.5">Kategoriya</th>
+                <th class="p-3.5">Narx</th>
+                <th class="p-3.5 text-center">Ombor Qoldig'i</th>
+                <th class="p-3.5 text-center">Zaxirani to'ldirish</th>
+                <th class="p-3.5 text-right">Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="sellerProductsTableBody" class="divide-y divide-gray-100">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Seller Orders To Pack -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+          <i class="fa-solid fa-box text-emerald-600"></i> Kelib tushgan buyurtmalar (Qadoqlash va tasdiqlash)
+        </h3>
+        <div id="sellerOrdersList" class="space-y-3">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 4: KURYER KABINETI -->
+    <!-- ============================================================== -->
+    <div id="view-courier" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center space-x-4">
+          <div class="w-14 h-14 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-2xl font-bold">
+            <i class="fa-solid fa-truck-fast"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-gray-800">Aziz Karimov (Yetkazib beruvchi kuryer)</h2>
+            <p class="text-sm text-gray-500"><i class="fa-solid fa-car mr-1"></i> Chevrolet Spark (01 A 777 AA) | <i class="fa-solid fa-phone mr-1"></i> +998 93 987 65 43</p>
+          </div>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl text-xs text-emerald-800 font-medium">
+          <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Kuryer statusi: <strong>Marshrutda</strong>
+        </div>
+      </div>
+
+      <!-- Assigned and Available Deliveries -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+            <i class="fa-solid fa-route text-emerald-600"></i> Yetkazib berish topshiriqlari
+          </h3>
+          <span class="text-xs text-gray-500">Mijoz manzili va topshirish statuslari</span>
+        </div>
+
+        <div id="courierDeliveriesList" class="space-y-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 5: BOSH ADMINISTRATOR (SUPERADMIN DASHBOARD) -->
+    <!-- ============================================================== -->
+    <div id="view-admin" class="hidden space-y-6">
+      
+      <!-- Top Action Bar -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-purple-600 bg-purple-50 px-2.5 py-1 rounded-md">
+            Superadmin Boshqaruv Markazi
+          </span>
+          <h2 class="text-xl font-bold text-gray-800 mt-2">Savdo Statistikasi, Tahlil va Tizim Nazorati</h2>
+          <p class="text-sm text-gray-500">Moliyaviy ko'rsatkichlar, foydalanuvchilar va to'liq audit hisoboti</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="exportToCSV()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5">
+            <i class="fa-solid fa-file-excel"></i> Excel (CSV) yuklash
+          </button>
+          <button onclick="window.print()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5">
+            <i class="fa-solid fa-print"></i> PDF / Chop etish
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Revenue Card -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between text-gray-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Jami Tushum</span>
+            <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <i class="fa-solid fa-wallet text-sm"></i>
+            </div>
+          </div>
+          <div id="statTotalRevenue" class="text-xl font-extrabold text-gray-900">0 so'm</div>
+          <div class="text-xs text-emerald-600 mt-1 flex items-center gap-1">
+            <i class="fa-solid fa-arrow-trend-up"></i> +18.4% o'tgan haftaga nisbatan
+          </div>
+        </div>
+
+        <!-- Orders Card -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between text-gray-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Jami Buyurtmalar</span>
+            <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <i class="fa-solid fa-boxes-stacked text-sm"></i>
+            </div>
+          </div>
+          <div id="statTotalOrders" class="text-xl font-extrabold text-gray-900">0 ta</div>
+          <div class="text-xs text-blue-600 mt-1 flex items-center gap-1">
+            <i class="fa-solid fa-circle-check"></i> <span id="statActiveOrders">0</span> tasi hozir jarayonda
+          </div>
+        </div>
+
+        <!-- Average Check -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between text-gray-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">O'rtacha Chek</span>
+            <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <i class="fa-solid fa-receipt text-sm"></i>
+            </div>
+          </div>
+          <div id="statAverageCheck" class="text-xl font-extrabold text-gray-900">0 so'm</div>
+          <div class="text-xs text-gray-500 mt-1">Har bir xarid bo'yicha</div>
+        </div>
+
+        <!-- Products & Users -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between text-gray-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Tizim Faollari</span>
+            <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+              <i class="fa-solid fa-users text-sm"></i>
+            </div>
+          </div>
+          <div id="statTotalUsers" class="text-xl font-extrabold text-gray-900">5 ta rol</div>
+          <div class="text-xs text-gray-500 mt-1">Katalogda <span id="statTotalProducts" class="font-semibold text-gray-700">0</span> ta mahsulot</div>
+        </div>
+      </div>
+
+      <!-- Charts Section (Savdo statistikasi grafiklari) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Sales Trend Line Chart -->
+        <div class="lg:col-span-2 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-chart-line text-emerald-600"></i> Haftalik savdo aylanmasi dinamikasi
+            </h4>
+            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">So'nggi 7 kun</span>
+          </div>
+          <div class="h-64">
+            <canvas id="salesChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Category Doughnut Chart -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-chart-pie text-teal-600"></i> Mahsulotlar toifasi ulushi
+            </h4>
+          </div>
+          <div class="h-64 flex items-center justify-center">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Selling Products & Users Matrix -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Top Products -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h4 class="font-bold text-gray-800 text-sm mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-trophy text-amber-500"></i> Eng ko'p sotilayotgan mahsulotlar (Top-5)
+          </h4>
+          <div id="adminTopProductsList" class="space-y-3">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Roles & Permissions Matrix -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h4 class="font-bold text-gray-800 text-sm mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved text-purple-600"></i> Foydalanuvchilar va rollar huquqlari
+          </h4>
+          <div id="adminUsersList" class="space-y-2.5 text-xs">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: SAVATCHA (CART DRAWER) -->
+  <!-- ============================================================== -->
+  <div id="cartDrawer" class="fixed inset-0 z-50 overflow-hidden hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" onclick="toggleCartDrawer(false)"></div>
+    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div class="w-screen max-w-md bg-white shadow-2xl flex flex-col">
+        <!-- Drawer Header -->
+        <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-cart-shopping text-emerald-400"></i>
+            <h3 class="text-base font-bold">Xarid savatchasi</h3>
+          </div>
+          <button onclick="toggleCartDrawer(false)" class="text-slate-400 hover:text-white p-1">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Drawer Items List -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-4" id="cartItemsList">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Drawer Footer (Checkout) -->
+        <div class="p-5 border-t border-gray-100 bg-gray-50 space-y-3">
+          <div class="flex justify-between text-sm text-gray-500">
+            <span>Mahsulotlar summasi:</span>
+            <span id="cartItemsSubtotal" class="font-semibold text-gray-800">0 so'm</span>
+          </div>
+          <div class="flex justify-between text-sm text-gray-500">
+            <span>Yetkazib berish:</span>
+            <span id="cartDeliveryEst" class="font-semibold text-emerald-600">Bepul (5 mln dan yuqori)</span>
+          </div>
+          <div class="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-200">
+            <span>Jami to'lov:</span>
+            <span id="cartTotalSum" class="text-emerald-700">0 so'm</span>
+          </div>
+          <button onclick="startCheckout()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2">
+            <span>Buyurtmani rasmiylashtirish</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: CHECKOUT & TO'LOV (PAYME / CLICK SHLYUZI) -->
+  <!-- ============================================================== -->
+  <div id="checkoutModal" class="fixed inset-0 z-50 overflow-y-auto hidden" role="dialog" aria-modal="true">
+    <div class="flex min-h-screen items-center justify-center p-4">
+      <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs" onclick="closeCheckoutModal()"></div>
+      <div class="relative bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 z-10">
+        
+        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div>
+            <h3 class="text-lg font-bold text-gray-900">Buyurtmani rasmiylashtirish</h3>
+            <p class="text-xs text-gray-500">Yetkazish manzili va to'lov usulini tanlang</p>
+          </div>
+          <button onclick="closeCheckoutModal()" class="text-gray-400 hover:text-gray-600 p-1">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <form id="checkoutForm" onsubmit="submitCheckout(event)" class="space-y-4">
+          <!-- Customer info -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Mijoz F.I.Sh:</label>
+            <input type="text" id="custNameInput" required value="Jasur Rahimov" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Telefon raqam:</label>
+            <input type="text" id="custPhoneInput" required value="+998 90 123 45 67" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+
+          <!-- Delivery method -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1.5">Yetkazib berish usuli:</label>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <label class="border border-gray-200 rounded-xl p-2.5 flex items-center gap-2 cursor-pointer hover:border-emerald-500 has-checked:border-emerald-600 has-checked:bg-emerald-50/50">
+                <input type="radio" name="deliveryMethod" value="courier" checked onchange="updateCheckoutDeliveryFee()" class="text-emerald-600 focus:ring-emerald-500">
+                <div>
+                  <div class="font-bold text-gray-800">🚚 Kuryer orqali</div>
+                  <div class="text-[10px] text-gray-500">Manzilgacha (25 000 so'm)</div>
+                </div>
+              </label>
+              <label class="border border-gray-200 rounded-xl p-2.5 flex items-center gap-2 cursor-pointer hover:border-emerald-500 has-checked:border-emerald-600 has-checked:bg-emerald-50/50">
+                <input type="radio" name="deliveryMethod" value="pvz" onchange="updateCheckoutDeliveryFee()" class="text-emerald-600 focus:ring-emerald-500">
+                <div>
+                  <div class="font-bold text-gray-800">🏪 PVZ (Punkt)</div>
+                  <div class="text-[10px] text-gray-500">Bepul olib ketish</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div id="addressFieldContainer">
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Yetkazib berish manzili:</label>
+            <input type="text" id="custAddressInput" required value="Toshkent sh., Chilonzor tumani, 9-mavze, 14-uy" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+
+          <!-- Payment Gateways -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1.5">To'lov tizimi:</label>
+            <div class="grid grid-cols-3 gap-2 text-xs">
+              <label class="border border-gray-200 rounded-xl p-2 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-cyan-500 has-checked:border-cyan-600 has-checked:bg-cyan-50/50">
+                <input type="radio" name="paymentMethod" value="payme" checked class="sr-only">
+                <span class="font-bold text-cyan-600">Payme</span>
+                <span class="text-[10px] text-gray-500">Karta orqali</span>
+              </label>
+              <label class="border border-gray-200 rounded-xl p-2 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-blue-500 has-checked:border-blue-600 has-checked:bg-blue-50/50">
+                <input type="radio" name="paymentMethod" value="click" class="sr-only">
+                <span class="font-bold text-blue-600">Click Up</span>
+                <span class="text-[10px] text-gray-500">Karta orqali</span>
+              </label>
+              <label class="border border-gray-200 rounded-xl p-2 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-emerald-500 has-checked:border-emerald-600 has-checked:bg-emerald-50/50">
+                <input type="radio" name="paymentMethod" value="cash" class="sr-only">
+                <span class="font-bold text-emerald-600">Naqd / Terminal</span>
+                <span class="text-[10px] text-gray-500">Yetkazilganda</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Checkout Total Breakdown -->
+          <div class="p-3 bg-gray-50 rounded-xl text-xs space-y-1">
+            <div class="flex justify-between text-gray-500">
+              <span>Tovarlar narxi:</span>
+              <span id="checkoutSubtotalText" class="font-semibold text-gray-800">0 so'm</span>
+            </div>
+            <div class="flex justify-between text-gray-500">
+              <span>Yetkazish narxi:</span>
+              <span id="checkoutDeliveryText" class="font-semibold text-emerald-600">0 so'm</span>
+            </div>
+            <div class="flex justify-between text-sm font-bold text-gray-900 pt-1.5 border-t border-gray-200">
+              <span>Jami:</span>
+              <span id="checkoutGrandTotalText" class="text-emerald-700">0 so'm</span>
+            </div>
+          </div>
+
+          <button type="submit" id="checkoutSubmitBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-lock"></i>
+            <span>To'lovni tasdiqlash va buyurtma berish</span>
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: SOTUVCHI YANGI MAHSULOT QO'SHISH -->
+  <!-- ============================================================== -->
+  <div id="addProductModal" class="fixed inset-0 z-50 overflow-y-auto hidden" role="dialog" aria-modal="true">
+    <div class="flex min-h-screen items-center justify-center p-4">
+      <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs" onclick="closeAddProductModal()"></div>
+      <div class="relative bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 z-10">
+        
+        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+          <h3 class="text-lg font-bold text-gray-900">Yangi mahsulot qo'shish</h3>
+          <button onclick="closeAddProductModal()" class="text-gray-400 hover:text-gray-600 p-1">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <form id="addProductForm" onsubmit="submitNewProduct(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">Mahsulot nomi:</label>
+            <input type="text" id="newProdTitle" required placeholder="Masalan: Samsung Galaxy Tab S9 Ultra" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">Kategoriya:</label>
+              <select id="newProdCategory" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                <option value="cat_smartphones">Smartfonlar va Gadjetlar</option>
+                <option value="cat_laptops">Noutbuklar va Kompyuterlar</option>
+                <option value="cat_appliances">Maishiy texnika</option>
+                <option value="cat_fashion">Kiyim va Poyabzal</option>
+                <option value="cat_home">Uy va Oshxona</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">Brend:</label>
+              <input type="text" id="newProdBrand" required placeholder="Samsung / Apple / boshqa" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">Sotuv narxi (so'm):</label>
+              <input type="number" id="newProdPrice" required placeholder="8500000" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">Eski narx (so'm):</label>
+              <input type="number" id="newProdOldPrice" placeholder="9500000" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">Ombor soni (dona):</label>
+              <input type="number" id="newProdStock" required placeholder="10" value="10" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">Rasm URL manzili:</label>
+            <input type="url" id="newProdImage" placeholder="https://images.unsplash.com/..." class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">Tavsif:</label>
+            <textarea id="newProdDesc" rows="2" placeholder="Qisqacha tavsifi va afzalliklari..." class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+          </div>
+
+          <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm mt-3">
+            <i class="fa-solid fa-check"></i> Saqlash va Katalogga chiqarish
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center p-4 rounded-xl shadow-xl text-white text-sm max-w-sm">
+    <div id="toastIcon" class="mr-3 text-lg"></div>
+    <div id="toastMessage" class="font-medium"></div>
+  </div>
+
+  <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4">
+      <p class="text-slate-300 font-semibold mb-1">“Smart Market” — Elektron Savdo Platformasi</p>
+      <p class="text-slate-500">1-Qadam talablari asosida yaratilgan to'liq funksional platforma prototipi. &copy; 2026</p>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
+
